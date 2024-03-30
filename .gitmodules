@@ -1,6 +1,6 @@
 [submodule "seller-app"]
     path = seller-app
-    url = https://github.com/ONDC-Official/seller-app.git
+    url = https://github.com/ONDC-Official/seller-app/tree/master
 [submodule "seller-app-protocol"]
     path = seller-app-protocol
     url = https://github.com/ONDC-Official/seller-app-protocol.git
