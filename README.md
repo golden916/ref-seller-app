@@ -12,6 +12,10 @@ This repo is Reference Seller App with micro-service architecture which contains
 ```
    git submodule init
    git submodule update
+
+If the above commands through any error you can try using the below command 
+
+   git submodule update --force --recursive --init --remote
 ```
 
 2. Firebase Authentication.
