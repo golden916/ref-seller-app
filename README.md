@@ -18,6 +18,8 @@ If the above commands through any error you can try using the below command
    git submodule update --force --recursive --init --remote
 ```
 
+- **Populate the .env file with environment variables as described in the below steps**
+
 2. Firebase Authentication.
    - Create the application under [firebase console](http://console.firebase.google.com).
    - Once the application is created, visit the application and click on authentication tab.
