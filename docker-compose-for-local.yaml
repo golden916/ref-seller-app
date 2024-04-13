@@ -1,5 +1,10 @@
-version: '2.4'
-
+version: '3.8'
+networks:
+  custom_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
 services:
 
   bpp-protocol-webserver:
@@ -25,11 +30,13 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       FLASK_SERVER: "True"
       DOCKER_DEFAULT_PLATFORM: ${DOCKER_DEFAULT_PLATFORM}
-      BG_DEFAULT_URL: ${BG_DEFAULT_URL}
     expose:
       - 5555
     ports:
       - 5555:5555
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.2
 
   bpp-protocol-consumer:
     build:
@@ -39,6 +46,7 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+
     environment:
       ENV: prod
       RABBITMQ_HOST: ${RABBITMQ_HOST}
@@ -56,6 +64,9 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       BG_DEFAULT_URL: ${BG_DEFAULT_URL}
       FLASK_SERVER: "False"
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.3
 
   rabbitmq:
     image: rabbitmq:3.10-management
@@ -64,21 +75,33 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.15
 
   mongo:
     image: mongo
     restart: always
+    command: mongod --quiet
+    platform: linux/arm64/v8
     ports:
       - 27017:27017
     volumes:
       - './data:/data/db'
 
+     
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.4
+
   seller:
     build:
       context: seller-app
       dockerfile: sellerDocker
-    restart: "always"
     environment:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
@@ -105,6 +128,7 @@ services:
       MMI_CLIENT_SECRET: ${MMI_CLIENT_SECRET}
       MMI_CLIENT_ID: ${MMI_CLIENT_ID}
       MMI_ADVANCE_API_KEY: ${MMI_ADVANCE_API_KEY}
+      DB_CONNECTION_STRING: ${DB_CONNECTION_STRING}
     volumes:
       - ./app:/srv/app
     ports:
@@ -114,11 +138,14 @@ services:
     expose:
       - 3019
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.5
+
   notification:
     build:
       context: seller-app
       dockerfile: notificationDocker
-    restart: "always"
     environment:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
@@ -142,11 +169,14 @@ services:
     expose:
       - 3020
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.6
+
   seller-client:
     build:
       context: seller-app
       dockerfile: sellerApiDocker
-    restart: "always"
     environment:
       FIREBASE_SERVICE_ACCOUNT_JSON_PATH: lib/config/firebase-service-account.json
       SELLER_SERVER_URL: http://seller:3019
@@ -172,6 +202,10 @@ services:
       - seller
       - postgres
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.7
+
   postgres:
     image: postgres
     environment:
@@ -181,6 +215,12 @@ services:
     volumes:
       - ./postgres_init_scripts/:/docker-entrypoint-initdb.d/
       - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.8
 
   nginx:
     build:
@@ -206,6 +246,10 @@ services:
       - "80:80"
       - "443:443"
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.9
+
   seller-app-igm:
     build:
       context: seller-app-igm
@@ -224,7 +268,11 @@ services:
       SELLER_SERVER_URL: http://seller:3019
     ports:
       - "8000:8000"
+
     restart: always
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.10
 
   bugzilla-node-backend:
     container_name: bugzilla-node-dev-seller
@@ -240,6 +288,10 @@ services:
       - "8001:8001"
     restart: always
 
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.11
+
   bugzilla-dev-service:
     build:
       context: ./seller-bugzilla-service/bugzilla-main
@@ -252,4 +304,12 @@ services:
     ports:
       - "90:80"
       - "5989:5900"
-
+    deploy:
+        resources:
+            limits:
+                memory: 300M
+            reservations:
+                memory: 300M
+    networks:
+      custom_network:
+        ipv4_address: 172.25.0.12

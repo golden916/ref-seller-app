@@ -1,6 +1,3 @@
-[submodule "seller-app"]
-    path = seller-app
-    url = https://github.com/ONDC-Official/seller-app.git
 [submodule "seller-app-protocol"]
     path = seller-app-protocol
     url = https://github.com/ONDC-Official/seller-app-protocol.git
@@ -13,3 +10,6 @@
 [submodule "seller-bugzilla-service"]
 	path = seller-bugzilla-service
 	url = https://github.com/ONDC-Official/seller-bugzilla-service.git
+[submodule "seller-app"]
+	path = seller-app
+	url = https://github.com/vanshraghav/ondc-seller-app/tree/master/seller-app
